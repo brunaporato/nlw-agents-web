@@ -28,7 +28,7 @@ export function QuestionItem({ question }: QuestionItemProps) {
               </div>
             </div>
             <div className="flex-1">
-              <p className="mb-1 font-medium text-foreground">Pergunta</p>
+              <p className="mb-1 font-medium text-foreground">Question</p>
               <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed">
                 {question.question}
               </p>
@@ -42,13 +42,13 @@ export function QuestionItem({ question }: QuestionItemProps) {
               </div>
             </div>
             <div className="flex-1">
-              <p className="mb-1 font-medium text-foreground">Resposta da IA</p>
+              <p className="mb-1 font-medium text-foreground">Answer from AI</p>
               <div className="text-muted-foreground">
                 {isGenerating ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="size-4 animate-spin text-primary" />
                     <span className="text-primary text-sm italic">
-                      Gerando resposta...
+                      Generating answer...
                     </span>
                   </div>
                 ) : (
