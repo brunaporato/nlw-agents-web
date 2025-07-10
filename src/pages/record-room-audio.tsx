@@ -15,6 +15,7 @@ type RecordRoomAudioParams = {
 export function RecordRoomAudio() {
   const [isRecording, setIsRecording] = useState(false);
   const recorder = useRef<MediaRecorder | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const params = useParams<RecordRoomAudioParams>();
 
@@ -27,6 +28,11 @@ export function RecordRoomAudio() {
 
     if (recorder.current && recorder.current.state !== "inactive") {
       recorder.current.stop();
+    }
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
   }
 
@@ -46,6 +52,30 @@ export function RecordRoomAudio() {
     console.log(result);
   }
 
+  function createRecorder(audio: MediaStream) {
+    recorder.current = new MediaRecorder(audio, {
+      mimeType: "audio/webm",
+      audioBitsPerSecond: 64_000,
+    });
+
+    recorder.current.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        uploadAudio(event.data);
+      }
+    };
+
+    recorder.current.onstart = () => {
+      console.log("Recording started");
+    };
+
+    recorder.current.onstop = () => {
+      console.log("Recording stopped");
+      setIsRecording(false);
+    };
+
+    recorder.current.start();
+  }
+
   async function startRecording() {
     if (!isRecordingSupported) {
       alert("Your browser does not support audio recording.");
@@ -63,27 +93,13 @@ export function RecordRoomAudio() {
         },
       });
 
-      recorder.current = new MediaRecorder(audio, {
-        mimeType: "audio/webm",
-        audioBitsPerSecond: 64_000,
-      });
+      createRecorder(audio);
 
-      recorder.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          uploadAudio(event.data);
-        }
-      };
+      intervalRef.current = setInterval(() => {
+        recorder.current?.stop();
 
-      recorder.current.onstart = () => {
-        console.log("Recording started");
-      };
-
-      recorder.current.onstop = () => {
-        console.log("Recording stopped");
-        setIsRecording(false);
-      };
-
-      recorder.current.start();
+        createRecorder(audio);
+      }, 5000);
     } catch (error) {
       console.error(error);
     }
